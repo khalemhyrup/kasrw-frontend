@@ -52,8 +52,7 @@
 class="${t.jenis}">${t.jenis}</td><td>${formatRupiah(t.jumlah)}</td></tr>`; 
       }); 
     } 
-    document.getElementById("form-transaksi").addEventListener("submit", async 
-function(e) { 
+    document.getElementById("form-transaksi").addEventListener("submit", async function(e) { 
       e.preventDefault(); 
       const body = { tanggal: document.getElementById("tanggal").value, 
         keterangan: document.getElementById("keterangan").value, 
