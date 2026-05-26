@@ -1,70 +1,370 @@
-<!DOCTYPE html> 
-<html lang="id"> 
-<head> 
-  <meta charset="UTF-8"> 
-  <title>Kas RW</title> 
-  <style> 
-    body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 
-0 20px; } 
-    h1 { color: #1a73e8; } 
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; } 
-    th, td { border: 1px solid #ddd; padding: 8px 12px; text-align: left; } 
-    th { background: #1a73e8; color: white; } 
-    tr:nth-child(even) { background: #f5f5f5; } 
-    .pemasukan { color: green; font-weight: bold; } 
-    .pengeluaran { color: red; font-weight: bold; } 
-    form { margin-top: 30px; display: grid; gap: 10px; max-width: 400px; } 
-    input, select { padding: 8px; border: 1px solid #ddd; border-radius: 4px; } 
-    button { padding: 10px; background: #1a73e8; color: white; border: none; 
-             border-radius: 4px; cursor: pointer; } 
-  </style> 
-</head> 
-<body> 
-  <h1>Aplikasi Pencatatan Kas RW</h1> 
-  <h2>Tambah Transaksi</h2> 
-  <form id="form-transaksi"> 
-    <input type="date" id="tanggal" required> 
-    <input type="text" id="keterangan" placeholder="Keterangan" required> 
-    <select id="jenis"> 
-      <option value="pemasukan">Pemasukan</option> 
-      <option value="pengeluaran">Pengeluaran</option> 
-    </select> 
-    <input type="number" id="jumlah" placeholder="Jumlah (Rp)" required> 
-    <button type="submit">Simpan</button> 
-  </form> 
-  <h2>Daftar Transaksi</h2> 
-  <table> 
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kas Digital RW 25</title>
+  <style>
+    :root {
+      --primary-color: #0d47a1;
+      --secondary-color: #1565c0;
+      --success-color: #27ae60;
+      --bg-color: #f4f6f9;
+      --text-color: #333333;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      padding-bottom: 40px;
+    }
+
+    /* HEADER SECTION */
+    .header {
+      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+      color: white;
+      text-align: center;
+      padding: 25px 20px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      margin-bottom: 25px;
+    }
+
+    .header h1 {
+      font-size: 26px;
+      font-weight: 600;
+      margin-bottom: 5px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .header p {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    .container {
+      max-width: 950px;
+      margin: 0 auto;
+      padding: 0 15px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 25px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+      margin-bottom: 25px;
+    }
+
+    /* FORM SECTION */
+    .form-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-bottom: 15px;
+    }
+
+    @media (max-width: 600px) {
+      .form-grid-2 { grid-template-columns: 1fr; }
+      .rekap-header-block { flex-direction: column; align-items: flex-start !important; gap: 10px; }
+      .action-buttons { flex-direction: column; }
+    }
+
+    .form-group { display: flex; flex-direction: column; gap: 5px; margin-bottom: 15px; }
+    .form-group label { font-size: 14px; font-weight: 600; color: #555; }
     
-<thead><tr><th>Tanggal</th><th>Keterangan</th><th>Jenis</th><th>Jumlah</th></tr></thead> 
-    <tbody id="tabel-transaksi"></tbody> 
-  </table> 
+    input, select {
+      padding: 10px 12px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 15px;
+      outline: none;
+      transition: border 0.2s;
+    }
+    input:focus, select:focus { border-color: var(--secondary-color); }
+
+    .btn-submit {
+      width: 100%;
+      padding: 12px;
+      background-color: var(--success-color);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 10px;
+    }
+
+    /* REKAPITULASI & TABLE */
+    .rekap-header-block {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid #eee;
+      padding-bottom: 12px;
+      margin-bottom: 15px;
+    }
+    .section-title { font-size: 18px; font-weight: 600; }
+    .saldo-label { font-size: 16px; font-weight: 700; color: #1565c0; text-align: right; }
+
+    .table-responsive { width: 100%; overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; text-align: left; }
+    th, td { padding: 12px 10px; font-size: 14px; border-bottom: 1px solid #eee; }
+    th { color: #777; font-weight: 600; }
+
+    /* BADGES */
+    .badge-pemasukan { background-color: #e0f7fa; color: #00838f; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    .badge-pengeluaran { background-color: #ffebee; color: #c62828; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    .text-pemasukan { color: var(--success-color); font-weight: 600; }
+    .text-pengeluaran { color: #c62828; font-weight: 600; }
+
+    /* ACTION BUTTONS (Detail, Edit, Delete) */
+    .action-buttons {
+      display: flex;
+      gap: 6px;
+    }
+    .btn-action {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.1s, opacity 0.2s;
+    }
+    .btn-action:hover { opacity: 0.8; transform: scale(1.05); }
+    
+    .btn-detail { background-color: #7b62f4; color: white; }
+    .btn-edit { background-color: #f2d154; color: #333; }
+    .btn-delete { background-color: #f25b5b; color: white; }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>📊 Kas Digital RW 25</h1>
+    <p>Sistem Informasi Pengelolaan Keuangan Warga (CRUD Terintegrasi AWS)</p>
+  </div>
+
+  <div class="container">
+    
+    <div class="card">
+      <form id="form-transaksi">
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label for="tanggal">Tanggal</label>
+            <input type="date" id="tanggal" required>
+          </div>
+          <div class="form-group">
+            <label for="jenis">Tipe Transaksi</label>
+            <select id="jenis">
+              <option value="pemasukan">Pemasukan (+)</option>
+              <option value="pengeluaran">Pengeluaran (-)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="keterangan">Keterangan (Admin / Penggunaan)</label>
+          <input type="text" id="keterangan" placeholder="Contoh: Iuran Wajib April - Admin Budi" required>
+        </div>
+
+        <div class="form-group">
+          <label for="jumlah">Jumlah (Rp)</label>
+          <input type="number" id="jumlah" placeholder="Contoh: 500000" required>
+        </div>
+
+        <button type="submit" class="btn-submit" id="btn-submit-form">Simpan Transaksi</button>
+        <button type="button" class="btn-submit" id="btn-cancel-edit" style="display: none; background-color: #777;">Batal Edit</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <div class="rekap-header-block">
+        <div class="section-title">📋 Rekapitulasi Transaksi</div>
+        <div class="saldo-label" id="total-saldo">Total Saldo: Rp 0</div>
+      </div>
+
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>Tanggal</th>
+              <th>Keterangan</th>
+              <th>Tipe</th>
+              <th>Jumlah</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="tabel-transaksi">
+            </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
   <script> 
+    // PERHATIAN: GANTI DENGAN IP PUBLIC BACKEND AWS KAMU!
     const API = "http://100.55.43.199:8000"; 
-    function formatRupiah(n){ return "Rp " + Number(n).toLocaleString("id-ID"); }
-        async function loadTransaksi() { 
-      const res = await fetch(API + "/transaksi"); 
-      const data = await res.json(); 
-      const tbody = document.getElementById("tabel-transaksi"); 
-      tbody.innerHTML = ""; 
-      data.forEach(function(t) { 
-        tbody.innerHTML += `<tr><td>${t.tanggal}</td><td>${t.keterangan}</td> 
-          <td 
-class="${t.jenis}">${t.jenis}</td><td>${formatRupiah(t.jumlah)}</td></tr>`; 
-      }); 
+    let currentEditId = null; // Menyimpan ID transaksi yang sedang diedit
+
+    function formatRupiah(n) { 
+      return "Rp " + Number(n).toLocaleString("id-ID"); 
+    }
+
+    // [READ] Menampilkan semua data
+    async function loadTransaksi() { 
+      try {
+        const res = await fetch(API + "/transaksi"); 
+        const data = await res.json(); 
+        const tbody = document.getElementById("tabel-transaksi"); 
+        
+        tbody.innerHTML = ""; 
+        let totalSaldo = 0;
+        
+        data.forEach(function(t) { 
+          let badgeClass = t.jenis === "pemasukan" ? "badge-pemasukan" : "badge-pengeluaran";
+          let textClass = t.jenis === "pemasukan" ? "text-pemasukan" : "text-pengeluaran";
+          let prefix = t.jenis === "pemasukan" ? "+ " : "- ";
+          
+          if (t.jenis === "pemasukan") totalSaldo += parseFloat(t.jumlah);
+          else totalSaldo -= parseFloat(t.jumlah);
+
+          tbody.innerHTML += `<tr>
+            <td>${t.tanggal}</td>
+            <td>${t.keterangan}</td> 
+            <td><span class="${badgeClass}">${t.jenis.toUpperCase()}</span></td>
+            <td class="${textClass}">${prefix}${formatRupiah(t.jumlah)}</td>
+            <td>
+              <div class="action-buttons">
+                <button class="btn-action btn-detail" onclick="lihatDetail(${t.id})">Detail</button>
+                <button class="btn-action btn-edit" onclick="siapkanEdit(${t.id})">Edit</button>
+                <button class="btn-action btn-delete" onclick="hapusTransaksi(${t.id})">Delete</button>
+              </div>
+            </td>
+          </tr>`; 
+        }); 
+
+        document.getElementById("total-saldo").innerText = "Total Saldo: " + formatRupiah(totalSaldo);
+      } catch (err) {
+        console.error("Gagal mengambil data:", err);
+      }
     } 
+
+    // [READ DETAIL] Menampilkan detail spesifik
+    async function lihatDetail(id) {
+      try {
+        const res = await fetch(`${API}/transaksi/${id}`);
+        const data = await res.json();
+        alert(`🔍 DETAIL TRANSAKSI\n\nID Transaksi: ${data.id}\nTanggal: ${data.tanggal}\nTipe: ${data.jenis.toUpperCase()}\nKeterangan: ${data.keterangan}\nNominal: ${formatRupiah(data.jumlah)}`);
+      } catch (err) {
+        alert("Gagal mengambil detail data.");
+      }
+    }
+
+    // [UPDATE - Tahap 1] Menarik data ke Form
+    async function siapkanEdit(id) {
+      try {
+        const res = await fetch(`${API}/transaksi/${id}`);
+        const data = await res.json();
+        
+        document.getElementById("tanggal").value = data.tanggal;
+        document.getElementById("keterangan").value = data.keterangan;
+        document.getElementById("jenis").value = data.jenis;
+        document.getElementById("jumlah").value = data.jumlah;
+        
+        currentEditId = id; // Tandai bahwa kita sedang dalam mode edit
+        
+        // Ubah tampilan tombol
+        const btnSubmit = document.getElementById("btn-submit-form");
+        btnSubmit.innerText = "Update Transaksi";
+        btnSubmit.style.backgroundColor = "#f2d154";
+        btnSubmit.style.color = "#333";
+        
+        document.getElementById("btn-cancel-edit").style.display = "block";
+        window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll ke atas
+      } catch (err) {
+        alert("Gagal memuat data untuk diedit.");
+      }
+    }
+
+    // [DELETE] Menghapus data
+    async function hapusTransaksi(id) {
+      if(confirm("⚠️ PERINGATAN!\nApakah Anda yakin ingin menghapus data transaksi ini secara permanen?")) {
+        try {
+          await fetch(`${API}/transaksi/${id}`, { method: "DELETE" });
+          loadTransaksi(); // Refresh tabel
+        } catch (err) {
+          alert("Gagal menghapus data.");
+        }
+      }
+    }
+
+    // [CREATE & UPDATE - Tahap 2] Menangani Submit Form
     document.getElementById("form-transaksi").addEventListener("submit", async function(e) { 
       e.preventDefault(); 
-      const body = { tanggal: document.getElementById("tanggal").value, 
+      
+      const body = { 
+        tanggal: document.getElementById("tanggal").value, 
         keterangan: document.getElementById("keterangan").value, 
         jenis: document.getElementById("jenis").value, 
-        jumlah: parseFloat(document.getElementById("jumlah").value) }; 
-      await fetch(API + "/transaksi", { method: "POST", 
-        headers: { "Content-Type": "application/json" }, 
-        body: JSON.stringify(body) }); 
-      e.target.reset(); 
-      loadTransaksi(); 
+        jumlah: parseFloat(document.getElementById("jumlah").value) 
+      }; 
+      
+      try {
+        if (currentEditId === null) {
+          // Mode CREATE
+          await fetch(API + "/transaksi", { 
+            method: "POST", 
+            headers: { "Content-Type": "application/json" }, 
+            body: JSON.stringify(body) 
+          }); 
+        } else {
+          // Mode UPDATE
+          await fetch(`${API}/transaksi/${currentEditId}`, { 
+            method: "PUT", 
+            headers: { "Content-Type": "application/json" }, 
+            body: JSON.stringify(body) 
+          }); 
+          batalkanEdit(); // Kembalikan form ke kondisi semula
+        }
+        
+        e.target.reset(); 
+        loadTransaksi(); 
+      } catch (err) {
+        alert("Gagal menyimpan data ke backend server AWS!");
+      }
     }); 
+
+    // Fungsi untuk membatalkan proses edit
+    document.getElementById("btn-cancel-edit").addEventListener("click", batalkanEdit);
+
+    function batalkanEdit() {
+      currentEditId = null;
+      document.getElementById("form-transaksi").reset();
+      
+      const btnSubmit = document.getElementById("btn-submit-form");
+      btnSubmit.innerText = "Simpan Transaksi";
+      btnSubmit.style.backgroundColor = "var(--success-color)";
+      btnSubmit.style.color = "white";
+      
+      document.getElementById("btn-cancel-edit").style.display = "none";
+    }
+
+    // Inisialisasi
     loadTransaksi(); 
   </script> 
-</body> 
-</html> 
+</body>
+</html>
